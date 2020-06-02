@@ -18,4 +18,11 @@ transaction_data['InvoiceYearMonth'] = transaction_data['InvoiceDate'].map(lambd
 transaction_data['Revenue'] = transaction_data['UnitPrice'] * transaction_data['Quantity']
 # generate revenue dataframe
 transaction_revenue = transaction_data.groupby(['InvoiceYearMonth'])['Revenue'].sum().reset_index()
-print(transaction_revenue.head())
+#print(transaction_revenue.head())
+
+# plot YearMonth revenues
+sns.lineplot(x=transaction_revenue['InvoiceYearMonth'],
+             y=transaction_revenue['Revenue'].apply(lambda revenue: revenue/1000000), data=transaction_revenue, markers='*')
+plt.title('Monthly Revenue in GBP')
+plt.ylabel('Revenue in Millions')
+plt.show()
