@@ -50,3 +50,35 @@ plt.figure()
 plt.plot(list(sse.keys()), list(sse.values()))
 plt.xlabel("Number of clusters")
 plt.show()
+
+kmeans = KMeans(n_clusters=4)# start with 4 clusters
+kmeans.fit(user[['Recency']])
+user['RecencyCluster'] = kmeans.predict(user[['Recency']])
+print('Recency Clusters as assigned by KMeans')
+print(user.head())
+
+#function for ordering cluster numbers
+def order_cluster(cluster_field_name, target_field_name,df,ascending):
+    new = df.groupby(cluster_field_name)[target_field_name].mean().reset_index()
+    new = new.sort_values(by=target_field_name,ascending=ascending).reset_index(drop=True)
+    new['index'] = new.index
+    final = pd.merge(df,new[[cluster_field_name,'index']], on=cluster_field_name)
+    final = final.drop([cluster_field_name],axis=1)
+    final = final.rename(columns={"index":cluster_field_name})
+    return final
+
+user = order_cluster('RecencyCluster', 'Recency',user,False)
+print('Ordered Recency Cluster')
+print(user.groupby('RecencyCluster')['Recency'].describe())
+
+means = KMeans(n_clusters=4)
+kmeans.fit(user[['Frequency']])
+user['FrequencyCluster'] = kmeans.predict(user[['Frequency']])
+
+#order the frequency cluster
+user = order_cluster('FrequencyCluster', 'Frequency',user,True)
+
+#see details of each cluster
+print('Ordered Frequcency Cluster')
+
+print(user.groupby('FrequencyCluster')['Frequency'].describe())
