@@ -65,3 +65,14 @@ sns.barplot(x=transaction_avg_revenue['InvoiceYearMonth'],
 plt.title('Monthly Orders Average Revenue')
 plt.ylabel('Average Revenue')
 plt.show()
+
+# investigating New and Existing Customers
+#create a dataframe contaning CustomerID and first purchase date(also called Min Purchase date)
+transaction_min_purchase = monthly_active_uk_users.groupby('CustomerID').InvoiceDate.min().reset_index()
+transaction_min_purchase.columns = ['CustomerID','MinPurchaseDate']
+transaction_min_purchase['MinPurchaseYearMonth'] = transaction_min_purchase['MinPurchaseDate'].map(lambda date: 100*date.year + date.month)
+
+#merge first purchase date column to our main dataframe (monthly_active_uk_users)
+monthly_active_uk_users = pd.merge(monthly_active_uk_users, transaction_min_purchase, on='CustomerID')
+
+print(transaction_min_purchase.head())
