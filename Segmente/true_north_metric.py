@@ -76,3 +76,15 @@ transaction_min_purchase['MinPurchaseYearMonth'] = transaction_min_purchase['Min
 monthly_active_uk_users = pd.merge(monthly_active_uk_users, transaction_min_purchase, on='CustomerID')
 
 print(transaction_min_purchase.head())
+
+#create a column called User Type and assign Existing if User's First Purchase Year Month before the selected Invoice Year Month
+monthly_active_uk_users['UserType'] = 'New'
+monthly_active_uk_users.loc[monthly_active_uk_users['InvoiceYearMonth']>monthly_active_uk_users['MinPurchaseYearMonth'],'UserType'] = 'Existing'
+
+#Revenue per month for each user type
+transaction_user_type_revenue = monthly_active_uk_users.groupby(['InvoiceYearMonth','UserType'])['Revenue'].sum().reset_index()
+
+#filtering the dates and plot the result
+transaction_user_type_revenue = transaction_user_type_revenue.query("InvoiceYearMonth != 201012 and InvoiceYearMonth != 201112")
+print('User Type Revenue')
+print(transaction_user_type_revenue.head())
