@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from sklearn.cluster import KMeans
 sns.set()
 
 '''
@@ -38,3 +39,14 @@ plt.ylabel('Frequency')
 plt.xlabel('Frequency in Days')
 plt.show()
 
+# K means clustering
+sse={}
+recency = user[['Recency']]
+for k in range(1, 10):
+    kmeans = KMeans(n_clusters=k, max_iter=1000).fit(recency)
+    recency["clusters"] = kmeans.labels_
+    sse[k] = kmeans.inertia_
+plt.figure()
+plt.plot(list(sse.keys()), list(sse.values()))
+plt.xlabel("Number of clusters")
+plt.show()
