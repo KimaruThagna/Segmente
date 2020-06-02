@@ -31,8 +31,10 @@ max_purchase['Recency'] = (max_purchase['MaxPurchaseDate'].max() - max_purchase[
 user = pd.merge(user, max_purchase[['CustomerID','Recency']], on='CustomerID')
 print('Recency since last purchase in days')
 print(user.head())
-sns.distplot(user['Recency'], kde=True, bins=10)
+sns.distplot(user['Recency'],kde=False, bins=10)
 sns.despine(left=True, bottom=True)
-plt.title('Recency Distribution in days')
+plt.title('Recency Distribution Histogram')
+plt.ylabel('Frequency')
+plt.xlabel('Frequency in Days')
 plt.show()
 
