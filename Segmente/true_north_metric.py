@@ -24,7 +24,7 @@ transaction_revenue['InvoiceYearMonth'] = transaction_revenue['InvoiceYearMonth'
 # monthly growth rate
 
 # plot YearMonth revenues
-sns.lineplot(x=transaction_revenue['InvoiceYearMonth'],
+sns.lineplot(x=transaction_revenue['InvoiceYearMonth'].astype(str),
              y=transaction_revenue['Revenue'].apply(lambda revenue: revenue/1000000), data=transaction_revenue)
 plt.title('Monthly Revenue in GBP')
 plt.ylabel('Revenue in Millions (M)')
@@ -32,7 +32,7 @@ plt.show()
 
 transaction_revenue['MonthlyGrowthRate'] = transaction_revenue['Revenue'].pct_change()
 
-sns.lineplot(x=transaction_revenue['InvoiceYearMonth'],
+sns.lineplot(x=transaction_revenue['InvoiceYearMonth'].astype(str),
              y=transaction_revenue['MonthlyGrowthRate'], data=transaction_revenue)
 plt.title('Monthly Revenue Growth ')
 plt.ylabel('Revenue change (%)')
@@ -42,6 +42,7 @@ plt.show()
 uk_users = transaction_data.query("Country=='United Kingdom'").reset_index(drop=True)
 #creating monthly active customers dataframe by counting unique Customer IDs nunique returns number of distinct observations
 monthly_active_uk_users = uk_users.groupby('InvoiceYearMonth')['CustomerID'].nunique().reset_index()
+print('Monthly Active Users')
 print(monthly_active_uk_users.head())
 
 sns.barplot(x=monthly_active_uk_users['InvoiceYearMonth'],
@@ -63,18 +64,18 @@ transaction_avg_revenue = transaction_data.groupby(['InvoiceYearMonth'])['Revenu
 sns.barplot(x=transaction_avg_revenue['InvoiceYearMonth'],
              y=transaction_avg_revenue['Revenue'], data=transaction_avg_revenue)
 plt.title('Monthly Orders Average Revenue')
-plt.ylabel('Average Revenue')
+plt.ylabel('Average Revenue per Order')
 plt.show()
 
 # investigating New and Existing Customers
 #create a dataframe contaning CustomerID and first purchase date(also called Min Purchase date)
-transaction_min_purchase = monthly_active_uk_users.groupby('CustomerID').InvoiceDate.min().reset_index()
+transaction_min_purchase = uk_users.groupby('CustomerID').InvoiceDate.min().reset_index()
 transaction_min_purchase.columns = ['CustomerID','MinPurchaseDate']
 transaction_min_purchase['MinPurchaseYearMonth'] = transaction_min_purchase['MinPurchaseDate'].map(lambda date: 100*date.year + date.month)
 
 #merge first purchase date column to our main dataframe (monthly_active_uk_users)
-monthly_active_uk_users = pd.merge(monthly_active_uk_users, transaction_min_purchase, on='CustomerID')
-
+monthly_active_uk_users = pd.merge(uk_users, transaction_min_purchase, on='CustomerID')
+print('First Purchase Date per Customer')
 print(transaction_min_purchase.head())
 
 #create a column called User Type and assign Existing if User's First Purchase Year Month before the selected Invoice Year Month
@@ -89,19 +90,20 @@ transaction_user_type_revenue = transaction_user_type_revenue.query("InvoiceYear
 print('User Type Revenue')
 print(transaction_user_type_revenue.head())
 
-sns.barplot(x=transaction_user_type_revenue['InvoiceYearMonth'],
+sns.lineplot(x=transaction_user_type_revenue['InvoiceYearMonth'].astype(str),
              y=transaction_user_type_revenue['Revenue'], hue=transaction_user_type_revenue['UserType'],data=transaction_user_type_revenue)
 plt.title('Monthly Revenues Based on User Type')
-plt.ylabel('Average Revenue')
+plt.ylabel('Average Monthly Revenue')
 plt.show()
 
-# Determining Customer Ratio 
+# Determining Customer Ratio
 #create a dataframe that shows new user ratio(new:existing) - we also need to drop NA values (first month new user ratio is 0)
 user_ratio = monthly_active_uk_users.query("UserType == 'New'").groupby(['InvoiceYearMonth'])['CustomerID'].nunique()/monthly_active_uk_users.query("UserType == 'Existing'").groupby(['InvoiceYearMonth'])['CustomerID'].nunique()
 user_ratio = user_ratio.reset_index()
 user_ratio = user_ratio.dropna()
 
 #print the dafaframe
+print('User Ratio, New/Existing')
 print(user_ratio.head())
 
 sns.barplot(x=user_ratio['InvoiceYearMonth'],
@@ -113,7 +115,7 @@ plt.show()
 # Determining Monthly Retention Rate. How good your business is at making customers come back
 
 #identify which users are active by looking at their revenue per month
-user_purchase = monthly_active_uk_users.groupby(['CustomerID','InvoiceYearMonth'])['Revenue'].sum().reset_index()
+user_purchase = uk_users.groupby(['CustomerID','InvoiceYearMonth'])['Revenue'].sum().reset_index()
 print("User Purchases Per Month")
 print(user_purchase.head())
 # build a customer retention table
@@ -157,7 +159,7 @@ for i in range(len(months)):
     prev_months = months[:i]
     next_months = months[i + 1:]
     for prev_month in prev_months:
-        retention_data[prev_month] = np.nan
+        retention_data[prev_month] = np.nan # cannot count retentaion rate for months before the current when considering the current
 
     total_user_count = retention_data['TotalUserCount'] = user_retention['m_' + str(selected_month)].sum()
     retention_data[selected_month] = 1
