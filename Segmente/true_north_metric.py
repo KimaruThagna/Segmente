@@ -91,6 +91,21 @@ print(transaction_user_type_revenue.head())
 
 sns.barplot(x=transaction_user_type_revenue['InvoiceYearMonth'],
              y=transaction_user_type_revenue['Revenue'], hue=transaction_user_type_revenue['UserType'],data=transaction_user_type_revenue)
-plt.title('Monthly Orders Average Revenue')
+plt.title('Monthly Revenues Based on User Type')
 plt.ylabel('Average Revenue')
+plt.show()
+
+# Determining Customer Ratio 
+#create a dataframe that shows new user ratio(new:existing) - we also need to drop NA values (first month new user ratio is 0)
+user_ratio = monthly_active_uk_users.query("UserType == 'New'").groupby(['InvoiceYearMonth'])['CustomerID'].nunique()/monthly_active_uk_users.query("UserType == 'Existing'").groupby(['InvoiceYearMonth'])['CustomerID'].nunique()
+user_ratio = user_ratio.reset_index()
+user_ratio = user_ratio.dropna()
+
+#print the dafaframe
+print(user_ratio.head())
+
+sns.barplot(x=user_ratio['InvoiceYearMonth'],
+             y=user_ratio['CustomerID'],data=user_ratio)
+plt.title('New vs Existing Customers Monthly Ratios')
+plt.ylabel('New/Existing')
 plt.show()
