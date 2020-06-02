@@ -82,3 +82,29 @@ user = order_cluster('FrequencyCluster', 'Frequency',user,True)
 print('Ordered Frequcency Cluster')
 
 print(user.groupby('FrequencyCluster')['Frequency'].describe())
+
+#revenue
+#calculate revenue for each customer
+uk_users['Revenue'] = uk_users['UnitPrice'] * uk_users['Quantity']
+revenue = uk_users.groupby('CustomerID').Revenue.sum().reset_index()
+
+#merge it with our main dataframe
+user = pd.merge(uk_users, revenue, on='CustomerID')
+print('Customer Revenue')
+print(user.head())
+#apply clustering
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(user[['Revenue']])
+user['RevenueCluster'] = kmeans.predict(user[['Revenue']])
+#order the cluster numbers
+user = order_cluster('RevenueCluster', 'Revenue',user,True)
+print('Customer Revenue Cluster')
+#show details of the dataframe
+print(user.groupby('RevenueCluster')['Revenue'].describe())
+
+# overall scoring
+#calculate overall score and use mean() to see details
+user['OverallScore'] = user['RecencyCluster'] + user['FrequencyCluster'] + user['RevenueCluster']
+final_scoring = user.groupby('OverallScore')['Recency','Frequency','Revenue'].mean()
+print('Final Scoring')
+print(final_scoring)
