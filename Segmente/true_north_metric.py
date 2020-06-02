@@ -118,3 +118,61 @@ print("User Purchases Per Month")
 print(user_purchase.head())
 # build a customer retention table
 user_retention = pd.crosstab(user_purchase['CustomerID'], user_purchase['InvoiceYearMonth']).reset_index()
+print('User Retention')
+print(user_retention.head())
+months = user_retention.columns[2:]
+retention_array = []
+for i in range(len(months) - 1):
+    retention_data = {}
+    selected_month = months[i + 1]
+    prev_month = months[i]
+    retention_data['InvoiceYearMonth'] = int(selected_month)
+    retention_data['TotalUserCount'] = user_retention[selected_month].sum()
+    retention_data['RetainedUserCount'] = \
+    user_retention[(user_retention[selected_month] > 0) & (user_retention[prev_month] > 0)][selected_month].sum()
+    retention_array.append(retention_data)
+
+# convert the array to dataframe and calculate Retention Rate
+user_retention = pd.DataFrame(retention_array)
+user_retention['RetentionRate'] = user_retention['RetainedUserCount'] / user_retention['TotalUserCount']
+print('Retention Rate')
+print(user_retention)
+
+sns.barplot(x=user_retention['InvoiceYearMonth'],
+             y=user_retention['RetentionRate'],data=user_retention)
+plt.title('Retention Rate')
+plt.ylabel('Retention Rate')
+plt.show()
+
+
+# Cohort based Retention Rate
+new_column_names = ['m_' + str(column) for column in user_retention.columns]
+user_retention.columns = new_column_names
+
+# create the array of Retained users for each cohort monthly
+retention_array = []
+for i in range(len(months)):
+    retention_data = {}
+    selected_month = months[i]
+    prev_months = months[:i]
+    next_months = months[i + 1:]
+    for prev_month in prev_months:
+        retention_data[prev_month] = np.nan
+
+    total_user_count = retention_data['TotalUserCount'] = user_retention['m_' + str(selected_month)].sum()
+    retention_data[selected_month] = 1
+
+    query = "{} > 0".format('m_' + str(selected_month))
+
+    for next_month in next_months:
+        query = query + " and {} > 0".format(str('m_' + str(next_month)))
+        retention_data[next_month] = np.round(
+            user_retention.query(query)['m_' + str(next_month)].sum() / total_user_count, 2)
+    retention_array.append(retention_data)
+
+user_retention = pd.DataFrame(retention_array)
+user_retention.index = months
+
+# showing new cohort based retention table
+print('Cohort Based Retention Table')
+print(user_retention.head())
