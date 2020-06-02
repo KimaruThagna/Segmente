@@ -109,3 +109,12 @@ sns.barplot(x=user_ratio['InvoiceYearMonth'],
 plt.title('New vs Existing Customers Monthly Ratios')
 plt.ylabel('New/Existing')
 plt.show()
+
+# Determining Monthly Retention Rate. How good your business is at making customers come back
+
+#identify which users are active by looking at their revenue per month
+user_purchase = monthly_active_uk_users.groupby(['CustomerID','InvoiceYearMonth'])['Revenue'].sum().reset_index()
+print("User Purchases Per Month")
+print(user_purchase.head())
+# build a customer retention table
+user_retention = pd.crosstab(user_purchase['CustomerID'], user_purchase['InvoiceYearMonth']).reset_index()
