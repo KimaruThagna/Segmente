@@ -114,3 +114,12 @@ user['OverallScore'] = user['RecencyCluster'] + user['FrequencyCluster'] + user[
 final_scoring = user.groupby('OverallScore')['Recency','Frequency','Revenue'].mean()
 print('Final Scoring')
 print(final_scoring)
+# add segment layer
+'''
+based on overall score, 
+0-2 Low Value customers
+3-4 Mid value
+5+ High value
+'''
+user['Segment'] = user['OverallScore'].apply(lambda value: ('LOW' if value <= 2 else 'medium') if value < 5 else 'HIGH')
+print(user.head())
