@@ -88,3 +88,9 @@ transaction_user_type_revenue = monthly_active_uk_users.groupby(['InvoiceYearMon
 transaction_user_type_revenue = transaction_user_type_revenue.query("InvoiceYearMonth != 201012 and InvoiceYearMonth != 201112")
 print('User Type Revenue')
 print(transaction_user_type_revenue.head())
+
+sns.barplot(x=transaction_user_type_revenue['InvoiceYearMonth'],
+             y=transaction_user_type_revenue['Revenue'], hue=transaction_user_type_revenue['UserType'],data=transaction_user_type_revenue)
+plt.title('Monthly Orders Average Revenue')
+plt.ylabel('Average Revenue')
+plt.show()
