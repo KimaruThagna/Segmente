@@ -70,7 +70,13 @@ def order_cluster(cluster_field_name, target_field_name,df,ascending):
 user = order_cluster('RecencyCluster', 'Recency',user,False)
 print('Ordered Recency Cluster')
 print(user.groupby('RecencyCluster')['Recency'].describe())
+# frequency
+#get order counts for each user and create a dataframe with it
+frequency = uk_users.groupby('CustomerID').InvoiceDate.count().reset_index()# number of purchases made
+frequency.columns = ['CustomerID','Frequency']
 
+#add this data to our main dataframe
+user = pd.merge(user, frequency, on='CustomerID')
 means = KMeans(n_clusters=4)
 kmeans.fit(user[['Frequency']])
 user['FrequencyCluster'] = kmeans.predict(user[['Frequency']])
@@ -89,7 +95,7 @@ uk_users['Revenue'] = uk_users['UnitPrice'] * uk_users['Quantity']
 revenue = uk_users.groupby('CustomerID').Revenue.sum().reset_index()
 
 #merge it with our main dataframe
-user = pd.merge(uk_users, revenue, on='CustomerID')
+user = pd.merge(user, revenue, on='CustomerID')
 print('Customer Revenue')
 print(user.head())
 #apply clustering
