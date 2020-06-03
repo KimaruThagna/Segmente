@@ -125,7 +125,9 @@ user['Segment'] = user['OverallScore'].apply(lambda value: ('LOW' if value <= 2 
 print(user.head())
 
 # Visualize Segmentation
-sns.scatterplot(x=user['Recency'], y=user['Revenue'], hue=user['Segment'], data=user)
+
+fig, axs = plt.subplots(ncols=3)
+sns.scatterplot(x=user['Recency'], y=user['Revenue'], hue=user['Segment'], data=user, ax=axs[0])
 sns.despine(left=True, bottom=True)
 plt.title('User Segmentation Distribution (Recency vs Revenue)')
 plt.ylabel('Revenue')
@@ -133,14 +135,14 @@ plt.xlabel('Recency')
 plt.show()
 
 
-sns.scatterplot(x=user['Frequency'], y=user['Revenue'], hue=user['Segment'], data=user)
+sns.scatterplot(x=user['Frequency'], y=user['Revenue'], hue=user['Segment'], data=user, ax=axs[1])
 sns.despine(left=True, bottom=True)
 plt.title('User Segmentation Distribution (Frequency vs Revenue)')
 plt.ylabel('Revenue')
 plt.xlabel('Recency')
 plt.show()
 
-sns.scatterplot(x=user['Revenue'], y=user['Frequency'], hue=user['Segment'], data=user)
+sns.scatterplot(x=user['Revenue'], y=user['Frequency'], hue=user['Segment'], data=user, ax=axs[2])
 sns.despine(left=True, bottom=True)
 plt.title('User Segmentation Distribution (Revenue vs Frequency)')
 plt.ylabel('Frequency')
