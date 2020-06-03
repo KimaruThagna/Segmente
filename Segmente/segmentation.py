@@ -123,3 +123,26 @@ based on overall score,
 '''
 user['Segment'] = user['OverallScore'].apply(lambda value: ('LOW' if value <= 2 else 'medium') if value < 5 else 'HIGH')
 print(user.head())
+
+# Visualize Segmentation
+sns.scatterplot(x=user['Recency'], y=user['Revenue'], hue=user['Segment'], data=user)
+sns.despine(left=True, bottom=True)
+plt.title('User Segmentation Distribution (Recency vs Revenue)')
+plt.ylabel('Revenue')
+plt.xlabel('Recency')
+plt.show()
+
+
+sns.scatterplot(x=user['Frequency'], y=user['Revenue'], hue=user['Segment'], data=user)
+sns.despine(left=True, bottom=True)
+plt.title('User Segmentation Distribution (Frequency vs Revenue)')
+plt.ylabel('Revenue')
+plt.xlabel('Recency')
+plt.show()
+
+sns.scatterplot(x=user['Revenue'], y=user['Frequency'], hue=user['Segment'], data=user)
+sns.despine(left=True, bottom=True)
+plt.title('User Segmentation Distribution (Revenue vs Frequency)')
+plt.ylabel('Frequency')
+plt.xlabel('Revenue')
+plt.show()
