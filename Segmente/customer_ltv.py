@@ -20,7 +20,9 @@ uk_users = transaction_data.query("Country=='United Kingdom'").reset_index(drop=
 transaction_data_3m = uk_users[(uk_users.InvoiceDate < date(2011,6,1)) & (uk_users.InvoiceDate >= date(2011,3,1))].reset_index(drop=True)
 # 6 months, june to dec
 transaction_data_6m = uk_users[(uk_users.InvoiceDate >= date(2011,6,1)) & (uk_users.InvoiceDate < date(2011,12,1))].reset_index(drop=True)
-
+print('3Month Data')
+print(transaction_data_3m)
 #create user_3m for assigning clustering
 user_3m = pd.DataFrame(transaction_data_3m['CustomerID'].unique())
 user_3m.columns = ['CustomerID']
+
