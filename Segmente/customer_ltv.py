@@ -37,3 +37,26 @@ def order_cluster(cluster_field_name, target_field_name,df,ascending):
     df_final = df_final.drop([cluster_field_name],axis=1)
     df_final = df_final.rename(columns={"index":cluster_field_name})
     return df_final
+
+#calculate recency score
+tx_max_purchase = transaction_data_3m.groupby('CustomerID').InvoiceDate.max().reset_index()
+tx_max_purchase.columns = ['CustomerID','MaxPurchaseDate']
+tx_max_purchase['Recency'] = (tx_max_purchase['MaxPurchaseDate'].max() - tx_max_purchase['MaxPurchaseDate']).dt.days
+uk_users = pd.merge(user_3m, tx_max_purchase[['CustomerID','Recency']], on='CustomerID')
+
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(user_3m[['Recency']])
+user_3m['RecencyCluster'] = kmeans.predict(user_3m[['Recency']])
+
+user_3m = order_cluster('RecencyCluster', 'Recency',user_3m,False)
+
+#calcuate frequency score
+tx_frequency = transaction_data_3m.groupby('CustomerID').InvoiceDate.count().reset_index()
+tx_frequency.columns = ['CustomerID','Frequency']
+user_3m = pd.merge(user_3m, tx_frequency, on='CustomerID')
+
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(user_3m[['Frequency']])
+user_3m['FrequencyCluster'] = kmeans.predict(user_3m[['Frequency']])
+
+user_3m = order_cluster('FrequencyCluster', 'Frequency',user_3m,True)
