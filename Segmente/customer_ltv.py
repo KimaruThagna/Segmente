@@ -76,3 +76,8 @@ user_3m['OverallScore'] = user_3m['RecencyCluster'] + user_3m['FrequencyCluster'
 user_3m['Segment'] = user_3m['OverallScore'].apply(lambda value: ('LOW' if value <= 2 else 'medium') if value < 5 else 'HIGH')
 print('3 Month Data with Segmentations')
 print(user_3m.head())
+# since there is no cost,
+#calculate revenue and create a new dataframe for it
+transaction_data_6m['Revenue'] = transaction_data_6m['UnitPrice'] * transaction_data_6m['Quantity']
+tx_user_6m = transaction_data_6m.groupby('CustomerID')['Revenue'].sum().reset_index()
+tx_user_6m.columns = ['CustomerID','m6_Revenue']
