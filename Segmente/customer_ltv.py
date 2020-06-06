@@ -11,6 +11,9 @@ from sklearn.model_selection import KFold, cross_val_score, train_test_split
 '''
 lifetimeValue = Gross Revenue-Total Cost
 This will be predicted based on the RFM clustering score
+Alternative calculation:
+CLTV = Average purchase value(total revenue/number of purchases)*Average purchase frequency(total purchases/number of unique customers)*
+customer lifespan(total lifespan/number of customers) 
 '''
 #read data from csv and redo the data work we done before
 transaction_data = pd.read_csv('datasets/OnlineRetail.csv')
@@ -81,3 +84,12 @@ print(user_3m.head())
 transaction_data_6m['Revenue'] = transaction_data_6m['UnitPrice'] * transaction_data_6m['Quantity']
 tx_user_6m = transaction_data_6m.groupby('CustomerID')['Revenue'].sum().reset_index()
 tx_user_6m.columns = ['CustomerID','m6_Revenue']
+
+# histogram for distribution of LTV
+
+sns.distplot(tx_user_6m.query('m6_Revenue < 10000')['m6_Revenue'], kde=True)
+sns.despine(left=True, bottom=True)
+plt.title('6 Month LTV (Revenue) Distribution')
+plt.ylabel('Number of Customers')
+plt.xlabel('Revenue(LTV)')
+plt.show()
