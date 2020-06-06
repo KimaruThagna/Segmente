@@ -93,3 +93,35 @@ plt.title('6 Month LTV (Revenue) Distribution')
 plt.ylabel('Number of Customers')
 plt.xlabel('Revenue(LTV)')
 plt.show()
+
+#merged frames to plot correlation between LTV and futureset
+merged_frame = pd.merge(user_3m, tx_user_6m, on='CustomerID', how='left')
+merged_frame = merged_frame.fillna(0)
+
+graph_data = merged_frame.query("m6_Revenue < 30000")
+
+#plot correlation between RFM and LTV
+sns.scatterplot(x=graph_data['OverallScore'], y=graph_data['m6_Revenue'], hue=graph_data['Segment'], data=graph_data)
+sns.despine(left=True, bottom=True)
+plt.title('6 Month LTV ')
+plt.ylabel('6 Month Revenue')
+plt.xlabel('RFM Score')
+plt.show()
+
+#remove outliers after studying and finding out the outlier is on the upper side
+merged_frame = merged_frame[merged_frame['m6_Revenue']<merged_frame['m6_Revenue'].quantile(0.99)]
+
+#creating 3 clusters
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(merged_frame[['m6_Revenue']])
+merged_frame['LTVCluster'] = kmeans.predict(merged_frame[['m6_Revenue']])
+
+#order cluster number based on LTV
+merged_frame = order_cluster('LTVCluster', 'm6_Revenue',merged_frame,True)
+
+#creating a new cluster dataframe
+clusters = merged_frame.copy()
+
+#see details of the clusters
+print('Segmentation based on 6 Months LTV')
+print(clusters.groupby('LTVCluster')['m6_Revenue'].describe())
