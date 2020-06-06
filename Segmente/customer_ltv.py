@@ -60,3 +60,19 @@ kmeans.fit(user_3m[['Frequency']])
 user_3m['FrequencyCluster'] = kmeans.predict(user_3m[['Frequency']])
 
 user_3m = order_cluster('FrequencyCluster', 'Frequency',user_3m,True)
+#calcuate revenue score
+transaction_data_3m['Revenue'] = transaction_data_3m['UnitPrice'] * transaction_data_3m['Quantity']
+tx_revenue = transaction_data_3m.groupby('CustomerID').Revenue.sum().reset_index()
+user_3m = pd.merge(user_3m, tx_revenue, on='CustomerID')
+
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(user_3m[['Revenue']])
+user_3m['RevenueCluster'] = kmeans.predict(user_3m[['Revenue']])
+user_3m = order_cluster('RevenueCluster', 'Revenue',user_3m,True)
+
+
+#overall scoring
+user_3m['OverallScore'] = user_3m['RecencyCluster'] + user_3m['FrequencyCluster'] + user_3m['RevenueCluster']
+user_3m['Segment'] = user_3m['OverallScore'].apply(lambda value: ('LOW' if value <= 2 else 'medium') if value < 5 else 'HIGH')
+print('3 Month Data with Segmentations')
+print(user_3m.head())
