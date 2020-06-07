@@ -137,7 +137,7 @@ corr_matrix['LTVCluster'].sort_values(ascending=False)
 
 print('Correlation Matrix')
 print(corr_matrix)
-sns.heatmap(corr_matrix)
+sns.heatmap(corr_matrix, annot=True)
 plt.title('Correlation Matrix')
 plt.show()
 #create X and y
@@ -153,5 +153,4 @@ print(f'Accuracy of XGB classifier on training set: {ltv_xgb_model.score(X_train
 print(f'Accuracy of XGB classifier on test set: {ltv_xgb_model.score(X_test[X_train.columns], y_test)}')
 
 y_pred = ltv_xgb_model.predict(X_test)
-print('Classification Report')
 print(classification_report(y_test, y_pred))
