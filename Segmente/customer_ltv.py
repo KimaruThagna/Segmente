@@ -146,3 +146,12 @@ y = categorial_classes['LTVCluster']
 
 #split training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05, random_state=42)
+#XGBoost Multiclassification Model
+ltv_xgb_model = xgb.XGBClassifier(max_depth=5, learning_rate=0.1,objective= 'multi:softprob',n_jobs=-1).fit(X_train, y_train)
+
+print(f'Accuracy of XGB classifier on training set: {ltv_xgb_model.score(X_train, y_train)}')
+print(f'Accuracy of XGB classifier on test set: {ltv_xgb_model.score(X_test[X_train.columns], y_test)}')
+
+y_pred = ltv_xgb_model.predict(X_test)
+print('Classification Report')
+print(classification_report(y_test, y_pred))
