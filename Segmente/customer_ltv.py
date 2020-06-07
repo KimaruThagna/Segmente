@@ -45,7 +45,7 @@ def order_cluster(cluster_field_name, target_field_name,df,ascending):
 tx_max_purchase = transaction_data_3m.groupby('CustomerID').InvoiceDate.max().reset_index()
 tx_max_purchase.columns = ['CustomerID','MaxPurchaseDate']
 tx_max_purchase['Recency'] = (tx_max_purchase['MaxPurchaseDate'].max() - tx_max_purchase['MaxPurchaseDate']).dt.days
-uk_users = pd.merge(user_3m, tx_max_purchase[['CustomerID','Recency']], on='CustomerID')
+user_3m = pd.merge(user_3m, tx_max_purchase[['CustomerID','Recency']], on='CustomerID')
 
 kmeans = KMeans(n_clusters=4)
 kmeans.fit(user_3m[['Recency']])
@@ -76,7 +76,7 @@ user_3m = order_cluster('RevenueCluster', 'Revenue',user_3m,True)
 
 #overall scoring
 user_3m['OverallScore'] = user_3m['RecencyCluster'] + user_3m['FrequencyCluster'] + user_3m['RevenueCluster']
-user_3m['Segment'] = user_3m['OverallScore'].apply(lambda value: ('LOW' if value <= 2 else 'medium') if value < 5 else 'HIGH')
+user_3m['Segment'] = user_3m['OverallScore'].apply(lambda value: ('LOW LTV' if value <= 2 else 'MEDIUM LTV') if value < 5 else 'HIGH LTV')
 print('3 Month Data with Segmentations')
 print(user_3m.head())
 # since there is no cost,
@@ -87,7 +87,7 @@ tx_user_6m.columns = ['CustomerID','m6_Revenue']
 
 # histogram for distribution of LTV
 
-sns.distplot(tx_user_6m.query('m6_Revenue < 10000')['m6_Revenue'], kde=True)
+sns.distplot(tx_user_6m.query('m6_Revenue < 10000')['m6_Revenue'], kde=False)
 sns.despine(left=True, bottom=True)
 plt.title('6 Month LTV (Revenue) Distribution')
 plt.ylabel('Number of Customers')
@@ -125,3 +125,24 @@ clusters = merged_frame.copy()
 #see details of the clusters
 print('Segmentation based on 6 Months LTV')
 print(clusters.groupby('LTVCluster')['m6_Revenue'].describe())
+
+#convert categorical columns to numerical
+categorial_classes = pd.get_dummies(merged_frame)
+
+print('LtvCluster column from categorical to numerical')
+print(categorial_classes.head())
+#calculate and show correlations
+corr_matrix = categorial_classes.corr()
+corr_matrix['LTVCluster'].sort_values(ascending=False)
+
+print('Correlation Matrix')
+print(corr_matrix)
+sns.heatmap(corr_matrix)
+plt.title('Correlation Matrix')
+plt.show()
+#create X and y
+X = categorial_classes.drop(['LTVCluster','m6_Revenue'],axis=1)
+y = categorial_classes['LTVCluster']
+
+#split training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05, random_state=42)
