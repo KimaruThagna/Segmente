@@ -102,4 +102,19 @@ def order_cluster(cluster_field_name, target_field_name,df,ascending):
 kmeans = KMeans(n_clusters=3)
 kmeans.fit(churn_data[['tenure']])
 churn_data['TenureCluster'] = kmeans.predict(churn_data[['tenure']])
+churn_data = order_cluster('TenureCluster', 'tenure', churn_data,True)
 print(churn_data.groupby('TenureCluster').tenure.describe())
+
+# monthly charge clusters
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(churn_data[['MonthlyCharges']])
+churn_data['MonthlyChargesCluster'] = kmeans.predict(churn_data[['MonthlyCharges']])
+churn_data = order_cluster('MonthlyChargesCluster', 'MonthlyCharges', churn_data,True)
+print(churn_data.groupby('MonthlyChargesCluster').MonthlyCharges.describe())
+
+#TotalCharges clusters
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(churn_data[['TotalCharges']])
+churn_data['TotalChargesCluster'] = kmeans.predict(churn_data[['TotalCharges']])
+churn_data = order_cluster('TotalChargesCluster', 'TotalCharges', churn_data,True)
+print(churn_data.groupby('TotalChargesCluster').TotalCharges.describe())
