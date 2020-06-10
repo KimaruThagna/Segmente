@@ -85,3 +85,9 @@ plt.show()
 
 #feature engineering
 #create Clusters for Tenure, monthly Charge and total charge
+
+#tenure clusters
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(churn_data[['tenure']])
+churn_data['TenureCluster'] = kmeans.predict(churn_data[['tenure']])
+print(churn_data.groupby('TenureCluster').tenure.describe())
