@@ -1,9 +1,11 @@
 import pandas as pd
 from sklearn.metrics import classification_report,confusion_matrix
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import LabelEncoder
 import xgboost as xgb
 
 churn_data = pd.read_csv('datasets/telco_data.csv')
@@ -107,6 +109,8 @@ kmeans.fit(churn_data[['tenure']])
 churn_data['TenureCluster'] = kmeans.predict(churn_data[['tenure']])
 churn_data = order_cluster('TenureCluster', 'tenure', churn_data,True)
 print(churn_data.groupby('TenureCluster').tenure.describe())
+# replace method is simpler compared to apply
+churn_data['TenureCluster'] = churn_data['TenureCluster'].replace({0:'Low',1:'Mid',2:'High'})
 
 # monthly charge clusters
 kmeans = KMeans(n_clusters=3)
@@ -121,3 +125,26 @@ kmeans.fit(churn_data[['TotalCharges']])
 churn_data['TotalChargesCluster'] = kmeans.predict(churn_data[['TotalCharges']])
 churn_data = order_cluster('TotalChargesCluster', 'TotalCharges', churn_data,True)
 print(churn_data.groupby('TotalChargesCluster').TotalCharges.describe())
+
+# label encoding
+le = LabelEncoder()
+dummy_columns = [] #array for multiple value columns
+for column in churn_data.columns:
+    if churn_data[column].dtype == object and column != 'customerID':
+        if churn_data[column].nunique() == 2:
+            #apply Label Encoder for binary ones
+            churn_data[column] = le.fit_transform(churn_data[column]) 
+        else: # more than 2 unique categories hence
+            dummy_columns.append(column)
+#apply get dummies for selected columns
+churn_data = pd.get_dummies(data = churn_data,columns = dummy_columns)
+
+#create feature set and labels
+X = churn_data.drop(['Churn','customerID'],axis=1)
+y = churn_data.Churn
+#train and test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=56)
+#building the model & printing the score
+xgb_model = xgb.XGBClassifier(max_depth=5, learning_rate=0.08, objective= 'binary:logistic',n_jobs=-1).fit(X_train, y_train)
+print(f'Accuracy of XGB classifier on training set: {xgb_model.score(X_train, y_train)}')
+print( f'Accuracy of XGB classifier on test set: {xgb_model.score(X_test[X_train.columns], y_test)}')
