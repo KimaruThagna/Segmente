@@ -8,6 +8,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import LabelEncoder
 import xgboost as xgb
 
+
 churn_data = pd.read_csv('datasets/telco_data.csv')
 churn_data.loc[churn_data.Churn=='No','Churn'] = 0
 churn_data.loc[churn_data.Churn=='Yes','Churn'] = 1
@@ -150,3 +151,7 @@ print(f'Accuracy of XGB classifier on training set: {xgb_model.score(X_train, y_
 print( f'Accuracy of XGB classifier on test set: {xgb_model.score(X_test[X_train.columns], y_test)}')
 y_pred = xgb_model.predict(X_test)
 print(classification_report(y_test, y_pred))
+
+# find out important features
+fig, ax = plt.subplots(figsize=(10,8))
+xgb.plot_importance(xgb_model, ax=ax)
