@@ -148,3 +148,5 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_
 xgb_model = xgb.XGBClassifier(max_depth=5, learning_rate=0.08, objective= 'binary:logistic',n_jobs=-1).fit(X_train, y_train)
 print(f'Accuracy of XGB classifier on training set: {xgb_model.score(X_train, y_train)}')
 print( f'Accuracy of XGB classifier on test set: {xgb_model.score(X_test[X_train.columns], y_test)}')
+y_pred = xgb_model.predict(X_test)
+print(classification_report(y_test, y_pred))
