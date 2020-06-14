@@ -139,3 +139,11 @@ transaction_day_diff = transaction_day_order.groupby('CustomerID').agg({'DayDiff
 transaction_day_diff.columns = ['CustomerID', 'DayDiffMean','DayDiffStd']
 # keep transactions where customers have >3 purchases
 transaction_day_order_last = transaction_day_order.drop_duplicates(subset=['CustomerID'],keep='last')
+
+transaction_day_order_last = transaction_day_order_last.dropna() # eliminate na values
+transaction_day_order_last = pd.merge(transaction_day_order_last, transaction_day_diff, on='CustomerID')
+transaction_user = pd.merge(transaction_user, transaction_day_order_last[['CustomerID','DayDiff','DayDiff2','DayDiff3','DayDiffMean','DayDiffStd']], on='CustomerID')
+#create transaction_class as a copy of transaction_user before applying get_dummies
+transaction_class = transaction_user.copy()
+transaction_class = pd.get_dummies(transaction_class)
+print(transaction_class.head())
