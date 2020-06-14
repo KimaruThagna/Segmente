@@ -147,3 +147,12 @@ transaction_user = pd.merge(transaction_user, transaction_day_order_last[['Custo
 transaction_class = transaction_user.copy()
 transaction_class = pd.get_dummies(transaction_class)
 print(transaction_class.head())
+# decide day range in next purchase date to make things eaiser 0-20 cls 2, 21-40 cls1, >50 cls0
+transaction_class['NextPurchaseDayRange'] = 2
+transaction_class.loc[transaction_class.NextPurchaseDay>20,'NextPurchaseDayRange'] = 1
+transaction_class.loc[transaction_class.NextPurchaseDay>50,'NextPurchaseDayRange'] = 0
+# correlation matrix
+corr = transaction_class[transaction_class.columns].corr()
+plt.figure(figsize = (30,20))
+sns.heatmap(corr, annot = True, linewidths=0.2, fmt=".2f")
+plt.show()
