@@ -82,3 +82,30 @@ transaction_user['FrequencyCluster'] = kmeans.predict(transaction_user[['Frequen
 #order frequency clusters and show the characteristics
 transaction_user = order_cluster('FrequencyCluster', 'Frequency',transaction_user,True)
 print(transaction_user.groupby('FrequencyCluster')['Frequency'].describe())
+
+#calculate monetary value, create a dataframe with it
+transaction_6m['Revenue'] = transaction_6m['UnitPrice'] * transaction_6m['Quantity']
+transaction_revenue = transaction_6m.groupby('CustomerID').Revenue.sum().reset_index()
+
+#add Revenue column to transaction_user
+transaction_user = pd.merge(transaction_user, transaction_revenue, on='CustomerID')
+
+
+#Revenue clusters 
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(transaction_user[['Revenue']])
+transaction_user['RevenueCluster'] = kmeans.predict(transaction_user[['Revenue']])
+
+#ordering clusters and who the characteristics
+transaction_user = order_cluster('RevenueCluster', 'Revenue',transaction_user,True)
+print(transaction_user.groupby('RevenueCluster')['Revenue'].describe())
+
+#building overall segmentation scores
+transaction_user['OverallScore'] = transaction_user['RecencyCluster'] + transaction_user['FrequencyCluster'] + transaction_user['RevenueCluster']
+#assign segment names
+transaction_user['Segment'] = 'Low-Value'
+transaction_user.loc[transaction_user['OverallScore']>2,'Segment'] = 'Mid-Value' 
+transaction_user.loc[transaction_user['OverallScore']>4,'Segment'] = 'High-Value'
+#plot revenue vs frequency
+transaction_graph = transaction_user.query("Revenue < 50000 and Frequency < 2000")
+
