@@ -122,3 +122,9 @@ transaction_day_order['InvoiceDay'] = transaction_6m['InvoiceDate'].dt.date
 transaction_day_order = transaction_day_order.sort_values(['CustomerID','InvoiceDate'])
 #drop duplicates
 transaction_day_order = transaction_day_order.drop_duplicates(subset=['CustomerID','InvoiceDay'],keep='first')
+# use shifting to create columns of the last 3 purchases
+#shifting last 3 purchase dates
+transaction_day_order['PrevInvoiceDate'] = transaction_day_order.groupby('CustomerID')['InvoiceDay'].shift(1)
+transaction_day_order['T2InvoiceDate'] = transaction_day_order.groupby('CustomerID')['InvoiceDay'].shift(2)
+transaction_day_order['T3InvoiceDate'] = transaction_day_order.groupby('CustomerID')['InvoiceDay'].shift(3)
+print(transaction_day_order.head())
