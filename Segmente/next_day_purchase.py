@@ -128,3 +128,8 @@ transaction_day_order['PrevInvoiceDate'] = transaction_day_order.groupby('Custom
 transaction_day_order['T2InvoiceDate'] = transaction_day_order.groupby('CustomerID')['InvoiceDay'].shift(2)
 transaction_day_order['T3InvoiceDate'] = transaction_day_order.groupby('CustomerID')['InvoiceDay'].shift(3)
 print(transaction_day_order.head())
+# difference in days between the last 3 purchases
+transaction_day_order['DayDiff'] = (transaction_day_order['InvoiceDay'] - transaction_day_order['PrevInvoiceDate']).dt.days
+transaction_day_order['DayDiff2'] = (transaction_day_order['InvoiceDay'] - transaction_day_order['T2InvoiceDate']).dt.days
+transaction_day_order['DayDiff3'] = (transaction_day_order['InvoiceDay'] - transaction_day_order['T3InvoiceDate']).dt.days
+print(transaction_day_order.head())
