@@ -133,3 +133,9 @@ transaction_day_order['DayDiff'] = (transaction_day_order['InvoiceDay'] - transa
 transaction_day_order['DayDiff2'] = (transaction_day_order['InvoiceDay'] - transaction_day_order['T2InvoiceDate']).dt.days
 transaction_day_order['DayDiff3'] = (transaction_day_order['InvoiceDay'] - transaction_day_order['T3InvoiceDate']).dt.days
 print(transaction_day_order.head())
+
+#compute mean and standard deviation
+transaction_day_diff = transaction_day_order.groupby('CustomerID').agg({'DayDiff': ['mean','std']}).reset_index()
+transaction_day_diff.columns = ['CustomerID', 'DayDiffMean','DayDiffStd']
+# keep transactions where customers have >3 purchases
+transaction_day_order_last = transaction_day_order.drop_duplicates(subset=['CustomerID'],keep='last')
