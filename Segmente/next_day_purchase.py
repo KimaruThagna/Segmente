@@ -6,14 +6,6 @@ import numpy as np
 import seaborn as sns
 #ml libraries
 from sklearn.cluster import KMeans
-from sklearn.svm import SVC
-from sklearn.multioutput import MultiOutputClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 import xgboost as xgb
 from sklearn.model_selection import KFold, cross_val_score, train_test_split, GridSearchCV
 
@@ -162,22 +154,6 @@ transaction_class = transaction_class.drop('NextPurchaseDay',axis=1)
 X, y = transaction_class.drop('NextPurchaseDayRange',axis=1), transaction_class.NextPurchaseDayRange
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=44)
 
-#Test out different models
-models = []
-models.append(("LR",LogisticRegression()))
-models.append(("NB",GaussianNB()))
-models.append(("RF",RandomForestClassifier()))
-models.append(("SVC",SVC()))
-models.append(("Dtree",DecisionTreeClassifier()))
-models.append(("XGB",xgb.XGBClassifier()))
-models.append(("KNN",KNeighborsClassifier()))
-
-#measure the accuracy
-for name,model in models:
-    kfold = KFold(n_splits=2, random_state=22)
-    cv_result = cross_val_score(model,X_train,y_train, cv = kfold,scoring = "accuracy")
-    print(name, cv_result)
-
 # perform gridsearch CV
 param_test1 = {
  'max_depth':range(3,10,2),
@@ -187,3 +163,7 @@ gsearch1 = GridSearchCV(estimator = xgb.XGBClassifier(),
 param_grid = param_test1, scoring='accuracy',n_jobs=-1,iid=False, cv=2)
 gsearch1.fit(X_train,y_train)
 print(gsearch1.best_params_, gsearch1.best_score_)
+
+# classification using XGB
+clf = xgb.XGBClassifier(max_depth=3, min_child_weight=5).fit(X_train, y_train)
+print(f'Accuracy on testing set: {clf.score(X_test[X_train.columns], y_test)}')
