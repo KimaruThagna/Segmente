@@ -15,7 +15,6 @@ Alternative calculation:
 CLTV = Average purchase value(total revenue/number of purchases)*Average purchase frequency(total purchases/number of unique customers)*
 customer lifespan(total lifespan/number of customers) 
 '''
-#read data from csv and redo the data work we done before
 transaction_data = pd.read_csv('datasets/OnlineRetail.csv')
 transaction_data['InvoiceDate'] = pd.to_datetime(transaction_data['InvoiceDate'])
 uk_users = transaction_data.query("Country=='United Kingdom'").reset_index(drop=True)

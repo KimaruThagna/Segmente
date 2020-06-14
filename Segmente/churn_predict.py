@@ -155,5 +155,6 @@ print(classification_report(y_test, y_pred))
 # find out important features
 fig, ax = plt.subplots(figsize=(10,8))
 xgb.plot_importance(xgb_model, ax=ax)
+plt.show()
 # add probability column
 churn_data['proba'] = xgb_model.predict_proba(churn_data[X_train.columns])[:,1]
