@@ -68,3 +68,17 @@ transaction_user = order_cluster('RecencyCluster', 'Recency',transaction_user,Fa
 
 #print cluster characteristics
 print(transaction_user.groupby('RecencyCluster')['Recency'].describe())
+#get total purchases for frequency scores
+transaction_frequency = transaction_6m.groupby('CustomerID').InvoiceDate.count().reset_index()
+transaction_frequency.columns = ['CustomerID','Frequency']
+
+#add frequency column to transaction_user
+transaction_user = pd.merge(transaction_user, transaction_frequency, on='CustomerID')
+#clustering for frequency
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(transaction_user[['Frequency']])
+transaction_user['FrequencyCluster'] = kmeans.predict(transaction_user[['Frequency']])
+
+#order frequency clusters and show the characteristics
+transaction_user = order_cluster('FrequencyCluster', 'Frequency',transaction_user,True)
+print(transaction_user.groupby('FrequencyCluster')['Frequency'].describe())
