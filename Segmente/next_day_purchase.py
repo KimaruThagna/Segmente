@@ -116,3 +116,9 @@ plt.ylabel('Revenue')
 plt.xlabel('Frequency of Purchase')
 plt.show()
 
+transaction_day_order = transaction_6m[['CustomerID','InvoiceDate']]
+#convert Invoice Datetime to day
+transaction_day_order['InvoiceDay'] = transaction_6m['InvoiceDate'].dt.date
+transaction_day_order = transaction_day_order.sort_values(['CustomerID','InvoiceDate'])
+#drop duplicates
+transaction_day_order = transaction_day_order.drop_duplicates(subset=['CustomerID','InvoiceDay'],keep='first')
