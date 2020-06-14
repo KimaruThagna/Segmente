@@ -156,3 +156,24 @@ corr = transaction_class[transaction_class.columns].corr()
 plt.figure(figsize = (30,20))
 sns.heatmap(corr, annot = True, linewidths=0.2, fmt=".2f")
 plt.show()
+
+#train & test split
+tx_class = tx_class.drop('NextPurchaseDay',axis=1)
+X, y = tx_class.drop('NextPurchaseDayRange',axis=1), tx_class.NextPurchaseDayRange
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=44)
+
+#Test out different models
+models = []
+models.append(("LR",LogisticRegression()))
+models.append(("NB",GaussianNB()))
+models.append(("RF",RandomForestClassifier()))
+models.append(("SVC",SVC()))
+models.append(("Dtree",DecisionTreeClassifier()))
+models.append(("XGB",xgb.XGBClassifier()))
+models.append(("KNN",KNeighborsClassifier()))
+
+#measure the accuracy
+for name,model in models:
+    kfold = KFold(n_splits=2, random_state=22)
+    cv_result = cross_val_score(model,X_train,y_train, cv = kfold,scoring = "accuracy")
+    print(name, cv_result)
