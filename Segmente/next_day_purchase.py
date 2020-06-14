@@ -167,3 +167,7 @@ print(gsearch1.best_params_, gsearch1.best_score_)
 # classification using XGB
 clf = xgb.XGBClassifier(max_depth=3, min_child_weight=5).fit(X_train, y_train)
 print(f'Accuracy on testing set: {clf.score(X_test[X_train.columns], y_test)}')
+
+# classification report
+y_pred = clf.predict(X_test)
+print(classification_report(y_test, y_pred))
