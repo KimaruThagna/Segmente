@@ -15,7 +15,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 import xgboost as xgb
-from sklearn.model_selection import KFold, cross_val_score, train_test_split
+from sklearn.model_selection import KFold, cross_val_score, train_test_split, GridSearchCV
 
 transaction_data = pd.read_csv('datasets/OnlineRetail.csv')
 transaction_data['InvoiceDate'] = pd.to_datetime(transaction_data['InvoiceDate'])
@@ -158,8 +158,8 @@ sns.heatmap(corr, annot = True, linewidths=0.2, fmt=".2f")
 plt.show()
 
 #train & test split
-tx_class = tx_class.drop('NextPurchaseDay',axis=1)
-X, y = tx_class.drop('NextPurchaseDayRange',axis=1), tx_class.NextPurchaseDayRange
+transaction_class = transaction_class.drop('NextPurchaseDay',axis=1)
+X, y = transaction_class.drop('NextPurchaseDayRange',axis=1), transaction_class.NextPurchaseDayRange
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=44)
 
 #Test out different models
@@ -177,3 +177,13 @@ for name,model in models:
     kfold = KFold(n_splits=2, random_state=22)
     cv_result = cross_val_score(model,X_train,y_train, cv = kfold,scoring = "accuracy")
     print(name, cv_result)
+
+# perform gridsearch CV
+param_test1 = {
+ 'max_depth':range(3,10,2),
+ 'min_child_weight':range(1,6,2)
+}
+gsearch1 = GridSearchCV(estimator = xgb.XGBClassifier(),
+param_grid = param_test1, scoring='accuracy',n_jobs=-1,iid=False, cv=2)
+gsearch1.fit(X_train,y_train)
+print(gsearch1.best_params_, gsearch1.best_score_)
