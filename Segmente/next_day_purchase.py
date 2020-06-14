@@ -109,3 +109,10 @@ transaction_user.loc[transaction_user['OverallScore']>4,'Segment'] = 'High-Value
 #plot revenue vs frequency
 transaction_graph = transaction_user.query("Revenue < 50000 and Frequency < 2000")
 
+sns.scatterplot(x=transaction_graph['Frequency'], y=transaction_graph['Revenue'], hue=transaction_graph['Segment'], data=transaction_graph)
+sns.despine(left=True, bottom=True)
+plt.title('User Segmentation Distribution (Frequency vs Revenue)')
+plt.ylabel('Revenue')
+plt.xlabel('Frequency of Purchase')
+plt.show()
+
