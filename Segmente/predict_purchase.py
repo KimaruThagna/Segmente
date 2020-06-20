@@ -2,7 +2,7 @@ from datetime import datetime, timedelta,date
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
+import statsmodels.formula.api as smf
 
 import keras
 from keras.layers import Dense
@@ -12,7 +12,7 @@ from keras.callbacks import EarlyStopping
 from keras.utils import np_utils
 from keras.layers import LSTM
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
-
+from sklearn.preprocessing import MinMaxScaler
 #read the data in csv
 sales = pd.read_csv('datasets/retail_sales.csv')
 
@@ -65,3 +65,43 @@ for inc in range(1,13):
 #drop null values
 salessupervised = salessupervised.dropna().reset_index(drop=True)
 print(salessupervised)
+
+# using adjusted r-squared to determine how well the featureset explains a label
+# Import statsmodels.formula.api
+
+# Define the regression formula
+model = smf.ols(formula='diff ~ lag_1', data=salessupervised)
+# Fit the regression
+model_fit = model.fit()
+# Extract the adjusted r-squared
+regression_adj_rsq = model_fit.rsquared_adj
+print(regression_adj_rsq)
+
+salesmodel = salessupervised.drop(['sales','date'],axis=1)
+#split train and test set
+train_set, test_set = salesmodel[0:-6].values, salesmodel[-6:].values
+print(train_set)
+
+#apply Min Max Scaler
+scaler = MinMaxScaler(feature_range=(-1, 1))
+scaler = scaler.fit(train_set)
+# reshape training set
+train_set = train_set.reshape(train_set.shape[0], train_set.shape[1])
+train_set_scaled = scaler.transform(train_set)
+# reshape test set
+test_set = test_set.reshape(test_set.shape[0], test_set.shape[1])
+test_set_scaled = scaler.transform(test_set)
+
+#train test split
+X_train, y_train = train_set_scaled[:, 1:], train_set_scaled[:, 0:1]
+X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
+X_test, y_test = test_set_scaled[:, 1:], test_set_scaled[:, 0:1]
+X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
+
+#model definition
+model = Sequential()
+model.add(LSTM(4, batch_input_shape=(1, X_train.shape[1], X_train.shape[2]), stateful=True))
+model.add(Dense(1))
+
+model.compile(loss='mean_squared_error', optimizer='adam')
+model.fit(X_train, y_train, nb_epoch=100, batch_size=1, verbose=1, shuffle=False)
