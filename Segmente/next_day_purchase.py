@@ -54,7 +54,9 @@ def order_cluster(cluster_field_name, target_field_name,df,ascending):
     df_final = df_final.rename(columns={"index":cluster_field_name})
     return df_final
 
-
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(transaction_user[['Recency']])
+transaction_user['RecencyCluster'] = kmeans.predict(transaction_user[['Recency']])
 #order recency clusters
 transaction_user = order_cluster('RecencyCluster', 'Recency',transaction_user,False)
 
