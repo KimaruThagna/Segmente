@@ -37,3 +37,13 @@ plt.title('Monthly Sales data')
 plt.ylabel('Sales($)')
 plt.xlabel('Month')
 plt.show()
+
+#create a new dataframe to model the difference
+sales_diff = sales.copy()
+#add previous sales to the next row
+sales_diff['prev_sales'] = sales_diff['sales'].shift(1)
+#drop the null values and calculate the difference
+sales_diff = sales_diff.dropna()# very first row will contain Nan due to shift function
+sales_diff['diff'] = (sales_diff['sales'] - sales_diff['prev_sales'])
+print('Sales Movement')
+print(sales_diff.head(10))
