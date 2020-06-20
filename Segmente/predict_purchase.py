@@ -47,3 +47,11 @@ sales_diff = sales_diff.dropna()# very first row will contain Nan due to shift f
 sales_diff['diff'] = (sales_diff['sales'] - sales_diff['prev_sales'])
 print('Sales Movement')
 print(sales_diff.head(10))
+
+# plot monthly difference in sales data
+sns.lineplot(x=sales_diff['date'], y=sales_diff['diff'], data=sales_diff, dashes=True)
+sns.despine(left=True, bottom=True)
+plt.title('Monthly Delta in Sales data')
+plt.ylabel('Delta($)')
+plt.xlabel('Month')
+plt.show()
