@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.formula.api as smf
-
+import numpy as np
 import keras
 from keras.layers import Dense
 from keras.models import Sequential
@@ -105,3 +105,35 @@ model.add(Dense(1))
 
 model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(X_train, y_train, nb_epoch=100, batch_size=1, verbose=1, shuffle=False)
+y_pred = model.predict(X_test,batch_size=1)
+print('predictions')
+print(y_pred)
+
+#reshape y_pred
+y_pred = y_pred.reshape(y_pred.shape[0], 1, y_pred.shape[1])
+#rebuild test set for inverse transform
+pred_test_set = []
+for index in range(0,len(y_pred)):
+    print (np.concatenate([y_pred[index],X_test[index]],axis=1))
+    pred_test_set.append(np.concatenate([y_pred[index],X_test[index]],axis=1))
+#reshape pred_test_set
+pred_test_set = np.array(pred_test_set)
+pred_test_set = pred_test_set.reshape(pred_test_set.shape[0], pred_test_set.shape[2])
+#inverse transform
+pred_test_set_inverted = scaler.inverse_transform(pred_test_set)
+print('Predictions inverted')
+print(pred_test_set)
+
+#create dataframe that shows the predicted sales
+result_list = []
+sales_dates = list(sales[-7:].date)
+act_sales = list(sales[-7:].sales)
+for index in range(0,len(pred_test_set_inverted)):
+    result_dict = {}
+    result_dict['pred_value'] = int(pred_test_set_inverted[index][0] + act_sales[index])
+    result_dict['date'] = sales_dates[index+1]
+    result_list.append(result_dict)
+result = pd.DataFrame(result_list)
+print('Predicted Sales')
+print(result)
+
