@@ -137,3 +137,13 @@ result = pd.DataFrame(result_list)
 print('Predicted Sales')
 print(result)
 
+#merge with actual sales dataframe
+sales_pred = pd.merge(sales,result,on='date',how='left')
+
+sns.lineplot(x=sales_pred['date'], y=sales_pred['sales'], data=sales_pred, dashes=True)
+sns.lineplot(x=sales_pred['date'], y=sales_pred['pred_value'], data=sales_pred, dashes=True)
+sns.despine(left=True, bottom=True)
+plt.title('Monthly Sales Data Prediction')
+plt.ylabel('Sales($)')
+plt.xlabel('Month')
+plt.show()
