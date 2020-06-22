@@ -75,3 +75,45 @@ plt.title('Recency vs Conversion')
 plt.ylabel('Conversion Rate')
 plt.xlabel('Recency (Months)')
 plt.show()
+
+sns.scatterplot(x=df_plot['is_referral'], y=df_plot['conversion'], data=df_plot)
+sns.despine(left=True, bottom=True)
+plt.title('Referral vs Conversion')
+plt.ylabel('Conversion Rate')
+plt.xlabel('Referral Boolean')
+plt.show()
+
+sns.scatterplot(x=df_plot['channel'], y=df_plot['conversion'], data=df_plot)
+sns.despine(left=True, bottom=True)
+plt.title('Channel vs Conversion')
+plt.ylabel('Conversion Rate')
+plt.xlabel('Channel')
+plt.show()
+
+sns.scatterplot(x=df_plot['offer'], y=df_plot['conversion'], data=df_plot)
+sns.despine(left=True, bottom=True)
+plt.title('Offer vs Conversion')
+plt.ylabel('Conversion Rate')
+plt.xlabel('Offer')
+plt.show()
+
+kmeans = KMeans(n_clusters=5)
+kmeans.fit(df_data[['history']])
+df_data['history_cluster'] = kmeans.predict(df_data[['history']])#order the cluster numbers
+df_data = order_cluster('history_cluster', 'history',df_data,True)#print how the clusters look like
+df_data.groupby('history_cluster').agg({'history':['mean','min','max'], 'conversion':['count', 'mean']})
+print('History aggregate data')
+print(df_data.head())
+
+df_plot = df_data.groupby('history_cluster').conversion.mean().reset_index()
+#higher cluster number means higher history value(value of purchases)
+sns.scatterplot(x=df_plot['history_cluster'], y=df_plot['conversion'], data=df_plot)
+sns.despine(left=True, bottom=True)
+plt.title('History Cluster vs Conversion')
+plt.ylabel('Conversion Rate')
+plt.xlabel('History')
+plt.show()
+
+df_data.groupby(['used_discount','used_bogo','offer']).agg({'conversion':'mean'})
+print(df_data.head())
+
