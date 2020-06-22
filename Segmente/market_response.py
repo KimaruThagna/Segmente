@@ -129,3 +129,18 @@ X_test['proba'] = xgb_model.predict_proba(X_test)[:,1]
 
 print('Probability of Conversion(0-1)')
 print(X_test.head())
+
+real_discount_uptake = len(X_test)*(X_test[X_test['offer_Discount'] == 1].conversion.mean() - X_test[X_test['offer_No Offer'] == 1].conversion.mean())
+pred_discount_uptake = len(X_test)*(X_test[X_test['offer_Discount'] == 1].proba.mean() - X_test[X_test['offer_No Offer'] == 1].proba.mean())
+
+print(f'Real discount uptake: Order:{real_discount_uptake}, revenue: ${real_discount_uptake * 25}')
+print(f'Predicted discount uptake Orders:{pred_discount_uptake}, Revenue: ${pred_discount_uptake*25}')
+print(f'Model prediction error: {((real_discount_uptake-pred_discount_uptake)/real_discount_uptake)*100}%')
+
+#BOGO offer
+real_bogo_uptick = len(X_test)*(X_test[X_test['offer_Buy One Get One'] == 1].conversion.mean() - X_test[X_test['offer_No Offer'] == 1].conversion.mean())
+pred_bogo_uptick = len(X_test)*(X_test[X_test['offer_Buy One Get One'] == 1].proba.mean() - X_test[X_test['offer_No Offer'] == 1].proba.mean())
+
+print(f'Real BOGO uptake: Order:{real_bogo_uptick}, revenue: ${real_bogo_uptick * 25}')
+print(f'Predicted BOGO uptake Orders:{pred_bogo_uptick}, Revenue: ${pred_bogo_uptick*25}')
+print(f'Model prediction error: {((real_bogo_uptick-pred_bogo_uptick)/real_bogo_uptick)*100}%')
