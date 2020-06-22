@@ -58,10 +58,10 @@ plt.show()
 
 #create dataframe for transformation from time series to supervised
 salessupervised = sales_diff.drop(['prev_sales'],axis=1)
-#adding lags
-for inc in range(1,13):
-    field_name = f'{inc} month(s) back'
-    salessupervised[field_name] = salessupervised['diff'].shift(inc)
+
+for month in range(1,13):
+    field_name = 'lag_'+str(month)
+    salessupervised[field_name] = salessupervised['diff'].shift(month)
 #drop null values
 salessupervised = salessupervised.dropna().reset_index(drop=True)
 print(salessupervised)
