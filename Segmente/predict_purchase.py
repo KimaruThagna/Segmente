@@ -60,7 +60,7 @@ plt.show()
 salessupervised = sales_diff.drop(['prev_sales'],axis=1)
 #adding lags
 for inc in range(1,13):
-    field_name = 'lag_' + str(inc)
+    field_name = f'{inc} month(s) back'
     salessupervised[field_name] = salessupervised['diff'].shift(inc)
 #drop null values
 salessupervised = salessupervised.dropna().reset_index(drop=True)
