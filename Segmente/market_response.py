@@ -66,3 +66,12 @@ def calculate_uplift(df):
     print(f'BOGO Order Uplift: {np.round(bogo_order_uplift, 2)}')
     print(f'BOGO Revenue Uplift: ${np.round(bogo_rev_uplift, 2)}')
     print('------END-------- \n')
+
+#how different features impact conversion
+df_plot = df_data.groupby('recency').conversion.mean().reset_index()
+sns.scatterplot(x=df_plot['recency'], y=df_plot['conversion'], data=df_plot)
+sns.despine(left=True, bottom=True)
+plt.title('Recency vs Conversion')
+plt.ylabel('Conversion Rate')
+plt.xlabel('Recency (Months)')
+plt.show()
