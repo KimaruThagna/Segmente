@@ -69,28 +69,28 @@ def calculate_uplift(df):
 
 #how different features impact conversion
 df_plot = df_data.groupby('recency').conversion.mean().reset_index()
-sns.scatterplot(x=df_plot['recency'], y=df_plot['conversion'], data=df_plot)
+sns.barplot(x=df_plot['recency'], y=df_plot['conversion'], data=df_plot)
 sns.despine(left=True, bottom=True)
 plt.title('Recency vs Conversion')
 plt.ylabel('Conversion Rate')
 plt.xlabel('Recency (Months)')
 plt.show()
 
-sns.scatterplot(x=df_plot['is_referral'], y=df_plot['conversion'], data=df_plot)
+sns.barplot(x=df_data['is_referral'], y=df_data['conversion'], data=df_data)
 sns.despine(left=True, bottom=True)
 plt.title('Referral vs Conversion')
 plt.ylabel('Conversion Rate')
 plt.xlabel('Referral Boolean')
 plt.show()
 
-sns.scatterplot(x=df_plot['channel'], y=df_plot['conversion'], data=df_plot)
+sns.barplot(x=df_data['channel'], y=df_data['conversion'], data=df_data)
 sns.despine(left=True, bottom=True)
 plt.title('Channel vs Conversion')
 plt.ylabel('Conversion Rate')
 plt.xlabel('Channel')
 plt.show()
 
-sns.scatterplot(x=df_plot['offer'], y=df_plot['conversion'], data=df_plot)
+sns.barplot(x=df_data['offer'], y=df_data['conversion'], data=df_data)
 sns.despine(left=True, bottom=True)
 plt.title('Offer vs Conversion')
 plt.ylabel('Conversion Rate')
@@ -107,7 +107,7 @@ print(df_data.head())
 
 df_plot = df_data.groupby('history_cluster').conversion.mean().reset_index()
 #higher cluster number means higher history value(value of purchases)
-sns.scatterplot(x=df_plot['history_cluster'], y=df_plot['conversion'], data=df_plot)
+sns.barplot(x=df_plot['history_cluster'], y=df_plot['conversion'], data=df_plot)
 sns.despine(left=True, bottom=True)
 plt.title('History Cluster vs Conversion')
 plt.ylabel('Conversion Rate')
@@ -126,6 +126,7 @@ y = response_data.conversion
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=356)
 xgb_model = xgb.XGBClassifier().fit(X_train, y_train)
 X_test['proba'] = xgb_model.predict_proba(X_test)[:,1]
+X_test['conversion'] = y_test
 
 print('Probability of Conversion(0-1)')
 print(X_test.head())
@@ -135,12 +136,12 @@ pred_discount_uptake = len(X_test)*(X_test[X_test['offer_Discount'] == 1].proba.
 
 print(f'Real discount uptake: Order:{real_discount_uptake}, revenue: ${real_discount_uptake * 25}')
 print(f'Predicted discount uptake Orders:{pred_discount_uptake}, Revenue: ${pred_discount_uptake*25}')
-print(f'Model prediction error: {((real_discount_uptake-pred_discount_uptake)/real_discount_uptake)*100}%')
+print(f'Model prediction error rate: {((real_discount_uptake-pred_discount_uptake)/real_discount_uptake)*100}%')
 
 #BOGO offer
-real_bogo_uptick = len(X_test)*(X_test[X_test['offer_Buy One Get One'] == 1].conversion.mean() - X_test[X_test['offer_No Offer'] == 1].conversion.mean())
-pred_bogo_uptick = len(X_test)*(X_test[X_test['offer_Buy One Get One'] == 1].proba.mean() - X_test[X_test['offer_No Offer'] == 1].proba.mean())
+real_bogo_uptake = len(X_test)*(X_test[X_test['offer_Buy One Get One'] == 1].conversion.mean() - X_test[X_test['offer_No Offer'] == 1].conversion.mean())
+pred_bogo_uptake = len(X_test)*(X_test[X_test['offer_Buy One Get One'] == 1].proba.mean() - X_test[X_test['offer_No Offer'] == 1].proba.mean())
 
-print(f'Real BOGO uptake: Order:{real_bogo_uptick}, revenue: ${real_bogo_uptick * 25}')
-print(f'Predicted BOGO uptake Orders:{pred_bogo_uptick}, Revenue: ${pred_bogo_uptick*25}')
-print(f'Model prediction error: {((real_bogo_uptick-pred_bogo_uptick)/real_bogo_uptick)*100}%')
+print(f'Real BOGO uptake: Order:{real_bogo_uptake}, revenue: ${real_bogo_uptake * 25}')
+print(f'Predicted BOGO uptake Orders:{pred_bogo_uptake}, Revenue: ${pred_bogo_uptake*25}')
+print(f'Model prediction error rate: {((real_bogo_uptake-pred_bogo_uptake)/real_bogo_uptake)*100}%')
