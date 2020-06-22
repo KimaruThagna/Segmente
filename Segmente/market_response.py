@@ -28,3 +28,41 @@ df_data = pd.read_csv('datasets/market_response.csv')
 
 # print first 10 rows
 print(df_data.head())
+
+'''
+Conversion Uplift: Conversion rate of test group - conversion rate of control group
+Order Uplift: Conversion uplift * No of converted customer in test group
+Revenue Uplift: Order Uplift * Average order value($25)
+'''
+
+
+def calculate_uplift(df):
+    # assigning 25$ to the average order value
+    avg_order_value = 25
+
+    # calculate conversions for each offer type
+    base_conv = df[df.offer == 'No Offer']['conversion'].mean()
+    discount_conv = df[df.offer == 'Discount']['conversion'].mean()
+    bogo_conv = df[df.offer == 'Buy One Get One']['conversion'].mean()
+
+    # calculate conversion uplift for discount and bogo
+    disc_conv_uplift = discount_conv - base_conv
+    bogo_conv_uplift = bogo_conv - base_conv
+
+    # calculate order uplift
+    discount_order_uplift = disc_conv_uplift * len(df[df.offer == 'Discount']['conversion'])
+    bogo_order_uplift = bogo_conv_uplift * len(df[df.offer == 'Buy One Get One']['conversion'])
+
+    # calculate revenue uplift
+    discount_rev_uplift = discount_order_uplift * avg_order_value
+    bogo_rev_uplift = bogo_order_uplift * avg_order_value
+    print('Uplift Report for Dataframe\n')
+    print(f'Discount Conversion Uplift: {np.round(disc_conv_uplift * 100, 2)}%')
+    print(f'Discount Order Uplift: {np.round(discount_order_uplift, 2)}')
+    print(f'Discount Revenue Uplift: ${np.round(discount_rev_uplift, 2)}\n')
+
+    print('-------------- \n')
+    print(f'BOGO Conversion Uplift: {np.round(bogo_conv_uplift * 100, 2)}%')
+    print(f'BOGO Order Uplift: {np.round(bogo_order_uplift, 2)}')
+    print(f'BOGO Revenue Uplift: ${np.round(bogo_rev_uplift, 2)}')
+    print('------END-------- \n')
