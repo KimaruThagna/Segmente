@@ -117,3 +117,15 @@ plt.show()
 df_data.groupby(['used_discount','used_bogo','offer']).agg({'conversion':'mean'})
 print(df_data.head())
 
+#feauture engineering
+response_data = pd.get_dummies(df_data.copy())
+#create feature set and labels
+X = response_data.drop(['conversion'],axis=1)
+y = response_data.conversion
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=356)
+xgb_model = xgb.XGBClassifier().fit(X_train, y_train)
+X_test['proba'] = xgb_model.predict_proba(X_test)[:,1]
+
+print('Probability of Conversion(0-1)')
+print(X_test.head())
