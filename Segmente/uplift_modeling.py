@@ -36,7 +36,7 @@ def order_cluster(cluster_field_name, target_field_name, df, ascending):
     df_final = df_final.rename(columns={"index": cluster_field_name})
     return df_final
 
-def calculate_uplift(df):
+def calculate_uplift(df, discount=True):
     # assigning 25$ to the average order value
     avg_order_value = 25
 
@@ -56,15 +56,21 @@ def calculate_uplift(df):
     # calculate revenue uplift
     discount_rev_uplift = discount_order_uplift * avg_order_value
     bogo_rev_uplift = bogo_order_uplift * avg_order_value
-    print('Uplift Report for Dataframe\n')
-    print(f'Discount Conversion Uplift: {np.round(disc_conv_uplift * 100, 2)}%')
-    print(f'Discount Order Uplift: {np.round(discount_order_uplift, 2)}')
-    print(f'Discount Revenue Uplift: ${np.round(discount_rev_uplift, 2)}\n')
 
-    print('-------------- \n')
-    print(f'BOGO Conversion Uplift: {np.round(bogo_conv_uplift * 100, 2)}%')
-    print(f'BOGO Order Uplift: {np.round(bogo_order_uplift, 2)}')
-    print(f'BOGO Revenue Uplift: ${np.round(bogo_rev_uplift, 2)}')
+    print('Uplift Report for Dataframe\n')
+    if discount:
+        print(f'User count{len(df)}')
+        print(f'Discount Conversion Uplift: {np.round(disc_conv_uplift * 100, 2)}%')
+        print(f'Discount Order Uplift: {np.round(discount_order_uplift, 2)}')
+        print(f'Discount Revenue Uplift: ${np.round(discount_rev_uplift, 2)}\n')
+        print(f'Revenue uplift per targeted customer ${(np.round(discount_rev_uplift, 2))/len(df)}')
+    else:
+        print('-------------- \n')
+        print(f'User count{len(df)}')
+        print(f'BOGO Conversion Uplift: {np.round(bogo_conv_uplift * 100, 2)}%')
+        print(f'BOGO Order Uplift: {np.round(bogo_order_uplift, 2)}')
+        print(f'BOGO Revenue Uplift: ${np.round(bogo_rev_uplift, 2)}')
+        print(f'Revenue uplift per targeted customer ${(np.round(discount_rev_uplift, 2)) / len(df)}')
     print('------END-------- \n')
 
 #calculate uplift data
@@ -111,3 +117,42 @@ df_data['uplift_score'] = df_model['uplift_score']
 
 print('Data with Uplift Scores')
 print(df_data.head(10))
+
+# model evaluation
+
+
+print('TARGET DATA')
+print('''
+Total Targeted Customer Count: 21307
+Discount Conversion Uplift: 7.66%
+Discount Order Uplift: 1631.89
+Discount Revenue Uplift: $40797.35
+Revenue Uplift Per Targeted Customer: $1.91
+''')
+
+print('UPLIFT MODEL EVALUATION FOR BOGO OFFERS')
+df_data_lift = df_data.copy()
+uplift_q_75 = df_data_lift.uplift_score.quantile(0.75)
+df_data_lift = df_data_lift[(df_data_lift.offer != 'Buy One Get One') & (df_data_lift.uplift_score > uplift_q_75)].reset_index(drop=True)
+print('Upper Quantile BOGO')
+calculate_uplift(df_data_lift)
+#below 0.5
+uplift_q_5 = df_data_lift.uplift_score.quantile(0.5)
+df_data_lift = df_data_lift[(df_data_lift.offer != 'Buy One Get One') & (df_data_lift.uplift_score < uplift_q_5)].reset_index(drop=True)#calculate the uplift
+print('Lower Quantile BOGO')
+calculate_uplift(df_data_lift)
+
+
+#DISCOUNT
+print('UPLIFT MODEL EVALUATION FOR DISCOUNT OFFERS')
+df_data_lift = df_data.copy()
+uplift_q_75 = df_data_lift.uplift_score.quantile(0.75)
+df_data_lift = df_data_lift[(df_data_lift.offer != 'Discount') & (df_data_lift.uplift_score < uplift_q_75)].reset_index(drop=True)#calculate the uplift
+print('Upper Quantile Discount')
+calculate_uplift(df_data_lift)
+
+uplift_q_5 = df_data_lift.uplift_score.quantile(0.5)
+df_data_lift = df_data_lift[(df_data_lift.offer != 'Discount') & (df_data_lift.uplift_score < uplift_q_5)].reset_index(drop=True)#calculate the uplift
+print('Lower Quantile Discount')
+calculate_uplift(df_data_lift)
+
