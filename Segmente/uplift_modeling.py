@@ -91,3 +91,23 @@ df_data['history_cluster'] = kmeans.predict(df_data[['history']])#order the clus
 df_data = order_cluster('history_cluster', 'history',df_data,True)#creating a new dataframe as model and dropping columns that defines the label
 df_model = df_data.drop(['offer','campaign_group','conversion'],axis=1)#convert categorical columns
 df_model = pd.get_dummies(df_model)
+
+# fit model and get probabilities
+#create feature set and labels
+X = df_model.drop(['target_class'],axis=1)
+y = df_model.target_class#splitting train and test groups
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=56)#fitting the model and predicting the probabilities
+xgb_model = xgb.XGBClassifier().fit(X_train, y_train)
+class_probs = xgb_model.predict_proba(X_test)
+# calculate uplift score
+#probabilities for all customers
+overall_proba = xgb_model.predict_proba(df_model.drop(['target_class'],axis=1))#assign probabilities to 4 different columns
+df_model['proba_CN'] = overall_proba[:,0]
+df_model['proba_CR'] = overall_proba[:,1]
+df_model['proba_TN'] = overall_proba[:,2]
+df_model['proba_TR'] = overall_proba[:,3]#calculate uplift score for all customers
+df_model['uplift_score'] = df_model.eval('proba_CN + proba_TR - proba_TN - proba_CR')#assign it back to main dataframe
+df_data['uplift_score'] = df_model['uplift_score']
+
+print('Data with Uplift Scores')
+print(df_data.head(10))
