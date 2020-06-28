@@ -19,6 +19,12 @@ import sklearn
 import xgboost as xgb
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 
+
+# import the data
+df_data = pd.read_csv('datasets/market_response.csv')
+
+# print first 10 rows
+print(df_data.head())
 # function to order clusters
 def order_cluster(cluster_field_name, target_field_name, df, ascending):
     new_cluster_field_name = 'new_' + cluster_field_name
@@ -60,3 +66,9 @@ def calculate_uplift(df):
     print(f'BOGO Order Uplift: {np.round(bogo_order_uplift, 2)}')
     print(f'BOGO Revenue Uplift: ${np.round(bogo_rev_uplift, 2)}')
     print('------END-------- \n')
+
+#calculate uplift data
+calculate_uplift(df_data)
+#campaign group column to differentiate treatement and control group
+df_data['campaign_group'] = 'treatment'
+df_data.loc[df_data.offer == 'No Offer', 'campaign_group'] = 'control'
