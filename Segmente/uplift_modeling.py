@@ -72,3 +72,22 @@ calculate_uplift(df_data)
 #campaign group column to differentiate treatement and control group
 df_data['campaign_group'] = 'treatment'
 df_data.loc[df_data.offer == 'No Offer', 'campaign_group'] = 'control'
+# labels for various buckets
+df_data['target_class'] = 0 #CN
+df_data.loc[(df_data.campaign_group == 'control') & (df_data.conversion > 0),'target_class'] = 1 #CR
+df_data.loc[(df_data.campaign_group == 'treatment') & (df_data.conversion == 0),'target_class'] = 2 #TN
+df_data.loc[(df_data.campaign_group == 'treatment') & (df_data.conversion > 0),'target_class'] = 3 #TR
+'''
+    0 -> Control Non-Responders
+    1 -> Control Responders
+    2 -> Treatment Non-Responders
+    3 -> Treatment Responders
+'''
+
+#creating the clusters
+kmeans = KMeans(n_clusters=5)
+kmeans.fit(df_data[['history']])
+df_data['history_cluster'] = kmeans.predict(df_data[['history']])#order the clusters
+df_data = order_cluster('history_cluster', 'history',df_data,True)#creating a new dataframe as model and dropping columns that defines the label
+df_model = df_data.drop(['offer','campaign_group','conversion'],axis=1)#convert categorical columns
+df_model = pd.get_dummies(df_model)
