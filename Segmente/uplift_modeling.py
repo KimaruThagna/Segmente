@@ -6,18 +6,13 @@
 
 '''
 ## Uplift formula: Uplift score= P(TR)+P(CN)-P(TN)-P(CR)
-
-from datetime import datetime, timedelta, date
 import pandas as pd
-from sklearn.metrics import classification_report, confusion_matrix
-import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
-
-import sklearn
 import xgboost as xgb
-from sklearn.model_selection import KFold, cross_val_score, train_test_split
+from sklearn.model_selection import train_test_split
 
 
 # import the data
@@ -114,6 +109,14 @@ df_data['uplift_score'] = df_model['uplift_score']
 print('Data with Uplift Scores')
 print(df_data.head(10))
 
+
+df_plot = df_data.groupby('target_class').uplift_score.mean().reset_index()
+sns.barplot(x=df_plot['target_class'], y=df_plot['uplift_score'], data=df_plot)
+sns.despine(left=True, bottom=True)
+plt.title('Target vs Conversion')
+plt.ylabel('Uplift Score')
+plt.xlabel('Target class')
+plt.show()
 # model evaluation
 
 
